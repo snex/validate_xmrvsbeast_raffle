@@ -25,7 +25,7 @@ class Parser
         op[:height] = h
       end
 
-      opts.on('--explorer EXPLORER', String, 'XMR Exolorer URL - REQUIRED') do |x|
+      opts.on('--explorer EXPLORER', String, 'XMR Exolorer URL - REQUIRED. Must be an instance of the Onion Monero Blockchain explorer, such as https://xmrchain.net/.') do |x|
         op[:explorer] = x
       end
 
