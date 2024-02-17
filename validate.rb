@@ -59,7 +59,8 @@ winner = if options[:height]
          end
 
 if winner.empty?
-  puts "#{FAIL}\nNo winner found matching height #{options[:height]}. Please check that you entered it correctly and have internet access."
+  puts "#{FAIL}"
+  puts "No winner found matching height #{options[:height]}. Please check that you entered it correctly and have internet access."
   exit 1
 end
 
