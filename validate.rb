@@ -68,9 +68,7 @@ end
 options = Parser.parse(ARGV)
 
 if !options.has_key?(:explorer)
-  puts '--explorer is required!'
   Parser.parse(%w[--help])
-  exit 1
 end
 
 print 'Validating XMR height exists in winners list... ' unless options[:quiet]
