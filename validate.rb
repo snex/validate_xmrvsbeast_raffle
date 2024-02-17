@@ -19,9 +19,9 @@ class Parser
   def self.parse(options)
     op = {}
     opt_parser = OptionParser.new do |opts|
-      opts.banner = 'Usage: validate.rb [options]'
+      opts.banner = 'Usage: ./validate.rb [options]'
 
-      opts.on('--height HEIGHT', Integer, 'Specify raffle XMR height') do |h|
+      opts.on('--height HEIGHT', Integer, 'Specify raffle XMR height - defaults to the most recent winner\'s reported height') do |h|
         op[:height] = h
       end
 
