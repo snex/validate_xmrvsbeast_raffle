@@ -3,11 +3,11 @@
 PASS = "\e[32m\u2713\e[0m".freeze
 FAIL = "\e[31m\u2717\e[0m".freeze
 
-RECENT_WINNERS = 'https://xmrvsbeast.com/p2pool/winners_recent_full_pub.txt'
-ROUND_TYPES = 'https://xmrvsbeast.com/p2pool/select_lists/round-type-list.txt'
-PLAYER_LISTS = 'https://xmrvsbeast.com/p2pool/select_lists'
+RECENT_WINNERS = 'https://xmrvsbeast.com/p2pool/winners_recent_full_pub.txt'.freeze
+ROUND_TYPES = 'https://xmrvsbeast.com/p2pool/select_lists/round-type-list.txt'.freeze
+PLAYER_LISTS = 'https://xmrvsbeast.com/p2pool/select_lists'.freeze
 
-TIMESTAMP_VALID_WITHIN = 60 * 60 # 1 hour
+TIMESTAMP_VALID_WITHIN = (60 * 60).freeze # 1 hour
 
 require 'csv'
 require 'json'
