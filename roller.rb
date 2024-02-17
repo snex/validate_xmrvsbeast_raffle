@@ -87,9 +87,8 @@ class Mersenne
 end
 
 class Roller
-  def self.roll(blockhash, file, rolls = '1')
+  def self.roll(blockhash, data, rolls = '1')
     blockhash = blockhash + rolls
-    data = File.readlines(file).map { |l| l.strip }
     mersenne = Mersenne.new(blockhash.hex)
     r = mersenne.random(data.size + 1) - 1
     data[r]

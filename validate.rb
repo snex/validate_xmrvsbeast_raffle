@@ -95,9 +95,8 @@ end
 print 'Validating round_type... '
 rolls = winner[6].split('/').last
 reported_round = winner[8]
-round_types = File.open('round-type-list.txt', 'w') { |f| f.puts(URI.open(ROUND_TYPES).read) }
-expected_round = Roller.roll(xmr_hash, 'round-type-list.txt', rolls)
-File.delete('round-type-list.txt')
+round_types = URI.open(ROUND_TYPES).read.split("\n")
+expected_round = Roller.roll(xmr_hash, round_types, rolls)
 
 if reported_round == expected_round
   puts PASS
@@ -110,9 +109,8 @@ end
 print 'Validating winner... '
 rolls = winner[6].split('/').first
 reported_winner = winner[0][0..7]
-player_list = File.open('players.txt', 'w') { |f| f.puts(URI.open("#{PLAYER_LISTS}/#{xmr_hash}-players.txt").read) }
-expected_winner = Roller.roll(xmr_hash, 'players.txt', rolls)
-File.delete('players.txt')
+player_list = URI.open("#{PLAYER_LISTS}/#{xmr_hash}-players.txt").read.split("\n")
+expected_winner = Roller.roll(xmr_hash, player_list, rolls)
 
 if reported_winner == expected_winner
   puts PASS
