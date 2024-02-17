@@ -48,7 +48,7 @@ if !options.has_key?(:explorer)
   exit 1
 end
 
-print 'Validating XMR height exists... '
+print 'Validating XMR height exists in winners list... '
 recent_winners = CSV.parse(URI.open(RECENT_WINNERS).read, col_sep: "\t")
 
 winner = if options[:height]
@@ -58,7 +58,7 @@ winner = if options[:height]
            recent_winners.first
          end
 
-if winner.empty?
+if !winner
   puts "#{FAIL}"
   puts "No winner found matching height #{options[:height]}. Please check that you entered it correctly and have internet access."
   exit 1
