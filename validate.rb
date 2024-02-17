@@ -49,7 +49,14 @@ if !options.has_key?(:explorer)
 end
 
 print 'Validating XMR height exists in winners list... '
-recent_winners = CSV.parse(URI.open(RECENT_WINNERS).read, col_sep: "\t")
+
+begin
+  recent_winners = CSV.parse(URI.open(RECENT_WINNERS).read, col_sep: "\t")
+rescue => e
+  puts FAIL
+  puts "Unable to download #{RECENT_WINNERS}, please check your internet connection."
+  exit 1
+end
 
 winner = if options[:height]
            recent_winners.select { |w| w[3].to_i == options[:height] }.first
@@ -59,7 +66,7 @@ winner = if options[:height]
          end
 
 if !winner
-  puts "#{FAIL}"
+  puts FAIL
   puts "No winner found matching height #{options[:height]}. Please check that you entered it correctly and have internet access."
   exit 1
 end
@@ -68,7 +75,15 @@ puts PASS
 
 print 'Validating height matches timestamp... '
 reported_ts = Time.parse(winner[1])
-xmr_block = JSON.parse(URI.open("#{options[:explorer]}/api/block/#{options[:height]}").read)
+
+begin
+  xmr_block = JSON.parse(URI.open("#{options[:explorer]}/api/block/#{options[:height]}").read)
+rescue
+  puts FAIL
+  puts "Unable to fetch blockchain hash from #{options[:explorer]}/api/block/#{options[:height]}, please check your internet connection."
+  exit 1
+end
+
 xmr_ts = Time.parse(xmr_block['data']['timestamp_utc'])
 timediff = (xmr_ts - reported_ts).abs.to_i
 
@@ -95,7 +110,15 @@ end
 print 'Validating round_type... '
 rolls = winner[6].split('/').last
 reported_round = winner[8]
-round_types = URI.open(ROUND_TYPES).read.split("\n")
+
+begin
+  round_types = URI.open(ROUND_TYPES).read.split("\n")
+rescue
+  puts FAIL
+  puts "Unable to fetch round_types data from #{ROUND_TYPES}, please check your internet connection."
+  exit 1
+end
+
 expected_round = Roller.roll(xmr_hash, round_types, rolls)
 
 if reported_round == expected_round
@@ -109,7 +132,15 @@ end
 print 'Validating winner... '
 rolls = winner[6].split('/').first
 reported_winner = winner[0][0..7]
-player_list = URI.open("#{PLAYER_LISTS}/#{xmr_hash}-players.txt").read.split("\n")
+
+begin
+  player_list = URI.open("#{PLAYER_LISTS}/#{xmr_hash}-players.txt").read.split("\n")
+rescue
+  puts FAIL
+  puts "Unable to fetch players data from #{PLAYER_LISTS}/#{xmr_hash}-players.txt, please check your internet connection."
+  exit 1
+end
+
 expected_winner = Roller.roll(xmr_hash, player_list, rolls)
 
 if reported_winner == expected_winner
