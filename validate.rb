@@ -31,19 +31,30 @@ class Parser
     opt_parser = OptionParser.new do |opts|
       opts.banner = 'Usage: ./validate.rb [options]'
 
-      opts.on('--height HEIGHT', Integer, 'Specify raffle XMR height - defaults to the most recent winner\'s reported height') do |h|
-        op[:height] = h
+      opts.on('-x', '--explorer=EXPLORER', String, 'REQUIRED. XMR Exolorer URL. Must be an instance of the Onion Monero Blockchain explorer, such as https://xmrchain.net/.') do |x|
+        op[:explorer] = x
       end
 
-      opts.on('--explorer EXPLORER', String, 'XMR Exolorer URL - REQUIRED. Must be an instance of the Onion Monero Blockchain explorer, such as https://xmrchain.net/.') do |x|
-        op[:explorer] = x
+      opts.on('-h', '--height=HEIGHT', Integer, 'Specify raffle XMR height - defaults to the most recent winner\'s reported height') do |h|
+        op[:height] = h
       end
 
       opts.on('-q', '--quiet', 'Do not print output.') do
         op[:quiet] = true
       end
 
-      opts.on('-h', '--help', 'Prints this help') do
+      opts.on('-c', '--cache-responses[=MINUTES]', Integer, 'Cache web responses using VCR gem (must be installed) for [MINUTES] minutes (default 30).') do |m|
+        require 'vcr'
+
+        VCR.configure do |c|
+          c.hook_into :webmock
+          c.cassette_library_dir = '/tmp/vcr'
+        end
+
+        op[:cache] = m || 30
+      end
+
+      opts.on('-?', '--help', 'Prints this help') do
         puts opts
         exit 0
       end
@@ -65,8 +76,15 @@ end
 print 'Validating XMR height exists in winners list... ' unless options[:quiet]
 
 begin
-  recent_winners = CSV.parse(URI.open(RECENT_WINNERS).read, col_sep: "\t")
+  recent_winners = if options[:cache]
+                     VCR.use_cassette('recent_winners', record: :new_episodes, re_record_interval: options[:cache] * 60, match_requests_on: [:method, :host, :path]) do
+                       CSV.parse(URI.open(RECENT_WINNERS).read, col_sep: "\t")
+                     end
+                   else
+                     CSV.parse(URI.open(RECENT_WINNERS).read, col_sep: "\t")
+                   end
 rescue => e
+  puts e.backtrace.join
   puts FAIL unless options[:quiet]
   puts "Unable to download #{RECENT_WINNERS}, please check your internet connection." unless options[:quiet]
   exit ERR_NO_RECENT_WINNERS
@@ -91,7 +109,13 @@ print 'Validating height matches timestamp... ' unless options[:quiet]
 reported_ts = Time.parse(winner[1])
 
 begin
-  xmr_block = JSON.parse(URI.open("#{options[:explorer]}/api/block/#{options[:height]}").read)
+  xmr_block = if options[:cache]
+                VCR.use_cassette('recent_winners', record: :new_episodes, re_record_interval: options[:cache] * 60, match_requests_on: [:method, :host, :path]) do
+                  JSON.parse(URI.open("#{options[:explorer]}/api/block/#{options[:height]}").read)
+                end
+              else
+                JSON.parse(URI.open("#{options[:explorer]}/api/block/#{options[:height]}").read)
+              end
 rescue
   puts FAIL unless options[:quiet]
   puts "Unable to fetch blockchain hash from #{options[:explorer]}/api/block/#{options[:height]}, please check your internet connection." unless options[:quiet]
@@ -126,7 +150,13 @@ rolls = winner[6].split('/').last
 reported_round = winner[8]
 
 begin
-  round_types = URI.open(ROUND_TYPES).read.split("\n")
+  round_types = if options[:cache]
+                  VCR.use_cassette('recent_winners', record: :new_episodes, re_record_interval: options[:cache] * 60, match_requests_on: [:method, :host, :path]) do
+                    URI.open(ROUND_TYPES).read.split("\n")
+                  end
+                else
+                  URI.open(ROUND_TYPES).read.split("\n")
+                end
 rescue
   puts FAIL unless options[:quiet]
   puts "Unable to fetch round_types data from #{ROUND_TYPES}, please check your internet connection." unless options[:quiet]
@@ -148,7 +178,13 @@ rolls = winner[6].split('/').first
 reported_winner = winner[0][0..7]
 
 begin
-  player_list = URI.open("#{PLAYER_LISTS}/#{xmr_hash}-players.txt").read.split("\n")
+  player_list = if options[:cache]
+                  VCR.use_cassette('recent_winners', record: :new_episodes, re_record_interval: options[:cache] * 60, match_requests_on: [:method, :host, :path]) do
+                    URI.open("#{PLAYER_LISTS}/#{xmr_hash}-players.txt").read.split("\n")
+                  end
+                else
+                  URI.open("#{PLAYER_LISTS}/#{xmr_hash}-players.txt").read.split("\n")
+                end
 rescue
   puts FAIL unless options[:quiet]
   puts "Unable to fetch players data from #{PLAYER_LISTS}/#{xmr_hash}-players.txt, please check your internet connection." unless options[:quiet]
