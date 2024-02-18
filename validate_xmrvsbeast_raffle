@@ -29,7 +29,7 @@ class Parser
   def self.parse(options)
     op = {}
     opt_parser = OptionParser.new do |opts|
-      opts.banner = 'Usage: ./validate.rb [options]'
+      opts.banner = "Usage: #{__FILE__} [options]"
 
       opts.on('-x', '--explorer=EXPLORER', String, 'REQUIRED. XMR Exolorer URL. Must be an instance of the Onion Monero Blockchain explorer, such as https://xmrchain.net/.') do |x|
         op[:explorer] = x
