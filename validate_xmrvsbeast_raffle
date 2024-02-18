@@ -23,7 +23,7 @@ require 'csv'
 require 'json'
 require 'open-uri'
 require 'optparse'
-require_relative './roller'
+require_relative './lib/roller'
 
 class Parser
   def self.parse(options)
