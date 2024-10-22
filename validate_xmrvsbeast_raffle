@@ -4,8 +4,7 @@ PASS = "\e[32m\u2713\e[0m".freeze
 FAIL = "\e[31m\u2717\e[0m".freeze
 
 RECENT_WINNERS = 'https://xmrvsbeast.com/p2pool/winners_recent_full_pub.txt'.freeze
-ROUND_TYPES = 'https://xmrvsbeast.com/p2pool/select_lists/round-type-list.txt'.freeze
-PLAYER_LISTS = 'https://xmrvsbeast.com/p2pool/select_lists'.freeze
+LISTS_LOCATION = 'https://xmrvsbeast.com/p2pool/select_lists'.freeze
 
 TIMESTAMP_VALID_WITHIN = (60 * 60).freeze # 1 hour
 
@@ -150,14 +149,14 @@ reported_round = winner[8]
 begin
   round_types = if options[:cache]
                   VCR.use_cassette('recent_winners', record: :new_episodes, re_record_interval: options[:cache] * 60, match_requests_on: [:method, :host, :path]) do
-                    URI.open(ROUND_TYPES).read.split("\n")
+                    URI.open("#{LISTS_LOCATION}/#{xmr_hash}-round-type-list.txt").read.split("\n")
                   end
                 else
-                  URI.open(ROUND_TYPES).read.split("\n")
+                  URI.open("#{LISTS_LOCATION}/#{xmr_hash}-round-type-list.txt").read.split("\n")
                 end
 rescue
   puts FAIL unless options[:quiet]
-  puts "Unable to fetch round_types data from #{ROUND_TYPES}, please check your internet connection." unless options[:quiet]
+  puts "Unable to fetch round_types data from #{LISTS_LOCATION}/#{xmr_hash}-round-type-list.txt, please check your internet connection." unless options[:quiet]
   exit ERR_NO_ROUND_TYPES
 end
 
@@ -178,14 +177,14 @@ reported_winner = winner[0][0..7]
 begin
   player_list = if options[:cache]
                   VCR.use_cassette('recent_winners', record: :new_episodes, re_record_interval: options[:cache] * 60, match_requests_on: [:method, :host, :path]) do
-                    URI.open("#{PLAYER_LISTS}/#{xmr_hash}-players.txt").read.split("\n")
+                    URI.open("#{LISTS_LOCATION}/#{xmr_hash}-players.txt").read.split("\n")
                   end
                 else
-                  URI.open("#{PLAYER_LISTS}/#{xmr_hash}-players.txt").read.split("\n")
+                  URI.open("#{LISTS_LOCATION}/#{xmr_hash}-players.txt").read.split("\n")
                 end
 rescue
   puts FAIL unless options[:quiet]
-  puts "Unable to fetch players data from #{PLAYER_LISTS}/#{xmr_hash}-players.txt, please check your internet connection." unless options[:quiet]
+  puts "Unable to fetch players data from #{LISTS_LOCATION}/#{xmr_hash}-players.txt, please check your internet connection." unless options[:quiet]
   exit ERR_NO_PLAYERS_LIST
 end
 
